@@ -17,7 +17,6 @@
     </el-row>
 
     <p>当前游戏模式为:{{msg}}</p>
-
   </div>
 </template>
 
@@ -39,7 +38,22 @@ export default class wow extends Vue {
   wm: string = "weimao";
   pj: string = "pjzc";
   nm: string = "normal";
-  _msg: string = "";
+  msg: string = "";
+  mounted() {
+    try {
+      let addon = fs.readlinkSync(this.targetAddOnPath);
+    } catch (error) {
+      this.normal();
+    }
+    let addon = fs.readlinkSync(this.targetAddOnPath);
+    if (addon.includes("pjzc")) {
+      this.msg = "评级战场";
+    } else if (addon.includes("weimao")) {
+      this.msg = "尾锚升级";
+    } else {
+      this.msg = "正常游戏";
+    }
+  }
   setGamePath() {
     electron.remote.dialog.showOpenDialog(
       {
@@ -82,32 +96,24 @@ export default class wow extends Vue {
   get normalWTFPath(): string {
     return this.targetWTFPath + this.nm;
   }
-  get msg(): string {
-    let addon = fs.readlinkSync(this.targetAddOnPath);
-    if (addon.includes("pjzc")) {
-      this._msg = "评级战场";
-    } else if (addon.includes("weimao")) {
-      this._msg = "尾锚升级";
-    } else {
-      this._msg = "正常游戏";
-    }
-    return this._msg;
-  }
-  set msg(message: string) {
-    this._msg = message;
-  }
+  // get msg(): string {
+  //   return this._msg;
+  // }
+  // set msg(message: string) {
+  //   this._msg = message;
+  // }
   weimao() {
-    this.msg = "尾锚升级"
+    this.msg = "尾锚升级";
     lib.createSymbolLink(this.weimaoAddOnPath, this.targetAddOnPath);
     lib.createSymbolLink(this.weimaoWTFPath, this.targetWTFPath);
   }
   pjzc() {
-    this.msg = "评级战场"
+    this.msg = "评级战场";
     lib.createSymbolLink(this.pjzcAddOnPath, this.targetAddOnPath);
     lib.createSymbolLink(this.pjzcWTFPath, this.targetWTFPath);
   }
   normal() {
-    this.msg = "正常游戏"
+    this.msg = "正常游戏";
     lib.createSymbolLink(this.normalAddOnPath, this.targetAddOnPath);
     lib.createSymbolLink(this.normalWTFPath, this.targetWTFPath);
   }
